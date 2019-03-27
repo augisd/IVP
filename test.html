@@ -88,14 +88,8 @@
 							//.data(data)
 							.enter()
 							.append('circle')
-							.attr('cx', function (d) {
-								if (d.TEAM_ID == "1610612744") {
-									return xScale(700 - d.LOC_Y)
-								} else {
-									return xScale(d.LOC_Y)
-								}
-							})
-							.attr('cy', function (d) {return yScale(d.LOC_X) + 20})
+							.attr('cx', function (d) {return xScale(d.LOC_Y)})
+							.attr('cy', function (d) {return yScale(d.LOC_X)})
 							.attr('r', '8')
 							.attr('stroke', function (d) 
 								{if (d.SHOT_MADE_FLAG == "1") {return "green"}
