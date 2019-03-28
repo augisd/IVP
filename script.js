@@ -1,7 +1,7 @@
 // Load data and convert string to numeric values
-var data = d3.csv("/data/test.csv").then(function(data) {
+var data = d3.csv("/data/test2.csv").then(function(data) {
 data.forEach(function(d) { d['LOC_Y'] = +d['LOC_Y'],
-						   d['LOC_X'] = +d['LOC_X']; 
+						   d['NEW_X'] = +d['NEW_X']; 
 
 }); 
 var i = 0
@@ -20,18 +20,14 @@ var xScale = d3.scaleLinear()
 	.range([0, w]);
 
 var yScale = d3.scaleLinear()
-	.domain([d3.min(data, function (d) {return d.LOC_X - 20;}),
-			 d3.max(data, function (d) {return d.LOC_X + 20;})])
+	.domain([d3.min(data, function (d) {return d.NEW_X - 20;}),
+			 d3.max(data, function (d) {return d.NEW_X + 20;})])
 	.range([h, 0]);
 
 // SVG
 var svgContainer = body.append('svg')
 	.attr('height', h)
 	.attr('width', w)
-// TEST
-
-
-// Markers
 // test plot
 var points = setInterval(
 	function(){
@@ -48,7 +44,7 @@ var points = setInterval(
 				.enter()
 				.append('circle')
 				.attr('cx', function (d) {return (xScale(d.LOC_Y))})
-				.attr('cy', function (d) {return (yScale(d.LOC_X))})
+				.attr('cy', function (d) {return (yScale(d.NEW_X))})
 				.attr('r', '8')
 				.attr('stroke', function (d) 
 					{if (d.SHOT_MADE_FLAG == "1") {return "green"}
