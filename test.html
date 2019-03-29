@@ -6,7 +6,7 @@
 </head>
 <body>
 	<script type="text/javascript">
-		var data = d3.csv("/data/rockets.csv").then(function(data) {
+		var data = d3.csv("/data/warriors.csv").then(function(data) {
 			data.forEach(function(d) { d['NEW_Y'] = +d['NEW_Y'],
 						  			   d['LOC_X'] = +d['LOC_X']; 
 
@@ -14,13 +14,12 @@
 
 			// Variables
 			var body = d3.select('body')
-			var h = 500
-			var w = 950
+			var h = 600
+			var w = 1500
 			var formatPercent = d3.format('.2%')
 			var basketCoord = [10,50]
 			var i = 0
 			var plotData = []
-			var splinedata = []
 
 			// Scales
 			var xScale = d3.scaleLinear()
@@ -33,15 +32,6 @@
 						 d3.max(data, function (d) {return d.LOC_X + 150;})])
 				.range([h, 0]);
 			
-			//Create spline data 
-			data.forEach(function(d) {
-				splinedata.push([[xScale(d.NEW_Y), yScale(d.LOC_X)],
-								  [xScale(d.NEW_Y), yScale(d.LOC_X + 150)],
-								  [xScale(0), yScale(150)],
-								  [xScale(0), yScale(100)]])
-			})
-			console.log(splinedata)
-
 			// SVG
 			var svgContainer = body.append('svg')
 				.attr('height', h)
@@ -49,15 +39,19 @@
 
 			var line = d3.line().curve(d3.curveBundle.beta(0.95))
 
-			var splines = svgContainer.selectAll('path')
-				.data(splinedata)
+			svgContainer.selectAll('path')
+				.data(data)
 				.enter()
 				.append('path')
-					.attr('d', function(d){return line(d)})
+					.attr('d', function(d){
+					return 	line([[xScale(d.NEW_Y), yScale(d.LOC_X)],
+								  [xScale(d.NEW_Y), yScale(d.LOC_X + 200)],
+								  [xScale(0), yScale(200)],
+								  [xScale(0), yScale(100)]])})
 					.attr("stroke", "black")
                     .attr("stroke-width", 1)
                     .attr("fill", "none")
-                    .attr("opacity", 0.2)
+                    .attr("opacity", 0.1)
 
 		/*	var lines = svgContainer.selectAll('line')
 						.data(data)
