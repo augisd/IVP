@@ -1,7 +1,7 @@
 // Load data and convert string to numeric values
-var data = d3.csv("/data/test2.csv").then(function(data) {
-data.forEach(function(d) { d['LOC_Y'] = +d['LOC_Y'],
-						   d['NEW_X'] = +d['NEW_X']; 
+var data = d3.csv("/data/curry.csv").then(function(data) {
+data.forEach(function(d) { d['NEW_Y'] = +d['NEW_Y'],
+						   d['LOC_X'] = +d['LOC_X']; 
 
 }); 
 var i = 0
@@ -15,13 +15,13 @@ var formatPercent = d3.format('.2%')
 
 // Scales
 var xScale = d3.scaleLinear()
-	.domain([d3.min(data, function (d) {return d.LOC_Y;}),
-			 d3.max(data, function (d) {return d.LOC_Y;})])
+	.domain([d3.min(data, function (d) {return d.NEW_Y;}),
+			 d3.max(data, function (d) {return d.NEW_Y;})])
 	.range([0, w]);
 
 var yScale = d3.scaleLinear()
-	.domain([d3.min(data, function (d) {return d.NEW_X - 20;}),
-			 d3.max(data, function (d) {return d.NEW_X + 20;})])
+	.domain([d3.min(data, function (d) {return d.LOC_X - 20;}),
+			 d3.max(data, function (d) {return d.LOC_X + 20;})])
 	.range([h, 0]);
 
 // SVG
@@ -43,8 +43,8 @@ var points = setInterval(
 				//.data(data)
 				.enter()
 				.append('circle')
-				.attr('cx', function (d) {return (xScale(d.LOC_Y))})
-				.attr('cy', function (d) {return (yScale(d.NEW_X))})
+				.attr('cx', function (d) {return (xScale(d.NEW_Y))})
+				.attr('cy', function (d) {return (yScale(d.LOC_X))})
 				.attr('r', '8')
 				.attr('stroke', function (d) 
 					{if (d.SHOT_MADE_FLAG == "1") {return "green"}
@@ -84,3 +84,4 @@ var points = setInterval(
 		}
 	}, 30); // interval time
 }); 
+

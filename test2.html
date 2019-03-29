@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript" src="d3.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		var lineData = [ { "x": 1,   "y": 100},  { "x": 1,  "y": 80}, {"x":50, "y":80}]
+		var data = [[1,100],[1,80],[50,80]]
+		var lineFunction = d3.line()
+		var pathdata = lineFunction(data)
+
+        var svgContainer = d3.select("body").append("svg")
+                                    .attr("width", 200)
+                                    .attr("height", 200);
+
+//The line SVG Path we draw
+		var lineGraph = svgContainer.append("path")
+                            .attr("d", lineFunction(data))
+                            .attr("stroke", "blue")
+                            .attr("stroke-width", 2)
+                            .attr("fill", "none");
+	</script>
+</body>
+</html>

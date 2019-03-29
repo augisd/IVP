@@ -1,136 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Visualization Test</title>
-	<script type="text/javascript" src="d3.js">	</script>
-	<style type="text/css">
-		circle:hover {
-			r : 16;
-			transition: r 0.5s;
-		}
-		#tooltip {
-			 position: absolute;
-			 width: 160px;
-			 height: auto;
-			 padding: 10px;
-			 background-color: white;
-			 -webkit-border-radius: 10px;
-			 -moz-border-radius: 10px;
-			 border-radius: 10px;
-			 -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-			 -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-			 box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-			 pointer-events: none;
-		}
-		#tooltip.hidden {
-			 display: none;
-		}
-		#tooltip p {
-			 margin: 0;
-			 font-family: sans-serif;
-			 font-size: 11px;
-			 line-height: 16px;
-		}
-	</style>
+	<script type="text/javascript" src="d3.js"></script>
+	<title></title>
 </head>
 <body>
-	<div id="tooltip" class="hidden">
-		 <p><strong>Shot Information:</strong></p>
-		 <p><span id="value">100</span></p>
-	</div>
-
 	<script type="text/javascript">
+		var data = d3.csv("/data/rockets.csv").then(function(data) {
+			data.forEach(function(d) { d['NEW_Y'] = +d['NEW_Y'],
+						  			   d['LOC_X'] = +d['LOC_X']; 
 
-		// Load data and convert string to numeric values
-		var data = d3.csv("/data/test.csv").then(function(data) {
-			data.forEach(function(d) { d['LOC_Y'] = +d['LOC_Y'],
-									   d['LOC_X'] = +d['LOC_X']; 
-			
-		}); 
-			var i = 0
-			var plotData = []
+									}); 
 
 			// Variables
 			var body = d3.select('body')
 			var h = 500
-			var w = 470
+			var w = 950
 			var formatPercent = d3.format('.2%')
-			
+			var basketCoord = [10,50]
+			var i = 0
+			var plotData = []
+			var splinedata = []
+
 			// Scales
 			var xScale = d3.scaleLinear()
-				.domain([d3.min(data, function (d) {return d.LOC_Y;}),
-						 d3.max(data, function (d) {return d.LOC_Y;})])
+				.domain([d3.min(data, function (d) {return d.NEW_Y - 50;}),
+						 d3.max(data, function (d) {return d.NEW_Y + 50;})])
 				.range([0, w]);
 
 			var yScale = d3.scaleLinear()
-				.domain([d3.min(data, function (d) {return d.LOC_X - 20;}),
-						 d3.max(data, function (d) {return d.LOC_X + 20;})])
+				.domain([d3.min(data, function (d) {return d.LOC_X - 50;}),
+						 d3.max(data, function (d) {return d.LOC_X + 150;})])
 				.range([h, 0]);
+			
+			//Create spline data 
+			data.forEach(function(d) {
+				splinedata.push([[xScale(d.NEW_Y), yScale(d.LOC_X)],
+								  [xScale(d.NEW_Y), yScale(d.LOC_X + 150)],
+								  [xScale(0), yScale(150)],
+								  [xScale(0), yScale(100)]])
+			})
+			console.log(splinedata)
 
 			// SVG
 			var svgContainer = body.append('svg')
 				.attr('height', h)
 				.attr('width', w)
-			// TEST
 
-			
-			// Markers
-			// test plot
-			var points = setInterval(
-				function(){
-					plotData.push(data[i]);
-					i += 1;
-					// Stop when all points are plotted
-					if (i > data.length) {
-						clearInterval(points);
-					// Else add a point to the plot
-					} else {
-					svgContainer.selectAll('circle')
-							.data(plotData)
-							//.data(data)
-							.enter()
-							.append('circle')
-							.attr('cx', function (d) {return (xScale(d.LOC_Y))})
-							.attr('cy', function (d) {return (yScale(d.LOC_X))})
-							.attr('r', '8')
-							.attr('stroke', function (d) 
-								{if (d.SHOT_MADE_FLAG == "1") {return "green"}
-								 else {return "red"}})
-							.attr('stroke-width', '3')
-							.attr('fill', function (d) {
-								if (d.TEAM_ID == "1610612744") {
-									return "yellow"
-								} else {
-									return "blue"
-								}
-							})
-							.append("title")
-							.text(function(d) {
-								return 'Player: ' + d.PLAYER_NAME + '\nAction Type: ' + d.ACTION_TYPE;
-							}) 
-							.on("mouseover", function(d) {
-								var xPos = parseFloat(d3.select(this)
-														.attr('cx'))
-								var yPos = parseFloat(d3.select(this)
-														.attr('cy'))
+			var line = d3.line().curve(d3.curveBundle.beta(0.95))
 
-								d3.select('#tooltip')
-									.style("left", xPos + 'px')
-									.style("top", yPos + 'px')
-									.select("#value")
-									.text(d.PLAYER_NAME
-										+ '\n' + d.ACTION_TYPE)
-								d3.select("#tooltip").classed("hidden", false);
+			var splines = svgContainer.selectAll('path')
+				.data(splinedata)
+				.enter()
+				.append('path')
+					.attr('d', function(d){return line(d)})
+					.attr("stroke", "black")
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none")
+                    .attr("opacity", 0.2)
 
-							})
-							.on("mouseout", function() {
-								//Hide the tooltip
-								d3.select("#tooltip").classed("hidden", true);
-								})
-						
-					}
-				}, 30); // interval time
-}); 
-		</script>
+		/*	var lines = svgContainer.selectAll('line')
+						.data(data)
+						.enter()
+						.append('line')
+							.attr("x1", function(d) { return xScale(d.NEW_Y); })
+				            .attr("y1", function(d) { return yScale(d.LOC_X); })
+				            .attr("x2", function(d) { return xScale(d.NEW_Y); })
+				            .attr("y2", function(d) { return yScale(d.LOC_X + 70); })
+				            .attr("stroke", "black")
+				            .attr("stroke-width", 1) ; */
+		});
+	</script>
+
 </body>
 </html>
