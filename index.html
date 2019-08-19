@@ -4,41 +4,67 @@
 	<title></title>
 	<script type="text/javascript" src="d3.js"></script>
 	<link rel="stylesheet" type="text/css" href="stylesheet.css"></link>
-
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
 
-	<div class = "dropdown">
-	
-		<button onclick="showTeams()" class = "dropbtn">Select Team (Curves)</button>
-			<div id = "teamsDropdown" class="dropdown-content">			
+	<h1>Advanced Shotchart visualization</h1>
+	<div class = "intro">
+		<p> Welcome to Advanced NBA Shotchart visualization interface. To use the interface,
+		first select the chart type and then select the team to visualize. Once the plot is rendered,
+		feel free to explore the filtering options. To reset the plot or change the plot type, just follow
+		the same steps.</p>
+	</div>
+	<div class = "grid-container">
+		<div class = "controlsChart">
+			<p>1. Select chart type</p>
+			<div class = "chartType">	
+				<button class = "curvesButton">Curves</button>
+				<button class = "colsButton">Columns</button>
 			</div>
-			
-	</div>
-	<div class = "dropdown">
-		<button onclick="showPlayers()" class = "dropbtn">Select Player</button>
-		<div id = "playersDropdown" class = "dropdown-content">
-		
 		</div>
-	</div>
-	
-	<div class = "shots">
-	
-		<button class = "madeShotsButton">Made Shots</button>
-		<button class = "allShotsButton">All Shots</button>
+		<div class = "controlsTeams">
+		<p>2. Select Team</p>
+			<div class = "dropdown">
+				<button onclick="showTeams()" class = "dropbtn" id = "teamsButton">Select Team</button>
+				<div id = "teamsDropdown" class="dropdown-content">			
+				</div>
+			</div>
+		</div>
+		<div class = "controlsPlayer">
+		<p>3. Filter by Player</p>
+			<div class = "dropdown">
+				<button onclick="showPlayers()" class = "dropbtn" id = "playersButton">Select Player</button>
+				<div id = "playersDropdown" class = "dropdown-content">
+				</div>
+			</div>
+		</div>
+		<div class = "controlsShots" id = "shots">
+			<div class = "shots">
+				<button id = "madeShotsButton">Made Shots</button>
+				<button id = "allShotsButton">All Shots</button>	
+			</div>
+		</div>
+		<div class = "controlsDistance">
+			<div id = "distanceSlider">
+				<p>Filter by shot distance</p>
+				<input type="range" id=mySlider class="slider" min="0" max="25" value="0">
+				<button onclick="resetDistance()">Reset</button>
+			</div>
+			<div id = "percentageSlider">
+				<p>Filter by shooting percentage</p>
+				<input type="range" id=colSliderMin class="slider" min="0" max="100" value="0">
+				<input type="range" id=colSliderMax class="slider" min="0" max="100" value="100">
+			</div>
+		</div>
+		<div class = "visualization">
+		</div>	
 		
 	</div>
-	
-	<div class = "chartType">
-	
-		<button class = "curvesButton">Curves</button>
-		<button class = "colsButton">Columns</button>
-	
-	</div>
-	<input type="range" name="mySlider" id=mySlider min="0" max="50" value="0">
-	
+
 	<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 	<script type="text/javascript" src="script.js"></script>
+	<script type="text/javascript" src="d3-tip.js"></script>
 	
 </body>
 </html>

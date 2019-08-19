@@ -1,81 +1,206 @@
-
 svg {
 	display: block;
+	margin: auto;
 	fill: white;
+	border: 3px solid #800080;
+	border-radius: 10px;
 }
-
+g rect:hover {
+	transition-duration: 0.5s;
+	opacity: 1;
+}
 body {
 	background-color: #000000;
 }
+h1 {
+	display: block;
+	margin:auto;
+	height: 50px;
+	text-align: center;
+	color: #FFFFFF;
+	font-family: Arial;
+}
+button {
+	margin: 1em;
+	background-color: #000000;
+	height: 3em;
+	width: 8em;
+	color: #800080;
+	font-size: 1.2em;
+	border: 0.1em solid #800080;
+	cursor: pointer;
+	border-radius: 0.1em;
+
+}
+button:hover, button:focus {
+	transition-duration: 0.5s;
+	background-color: #800080;
+	color: #000000;
+}
+p {
+	color: #FFFFFF;
+	font-family: Arial;
+	font-size: 1em;
+	text-align: center;
+	height: 1em;
+}
+
+.intro {
+	width: 50%;
+	height: auto;
+	margin: auto;
+	margin-bottom: 5em;
+	display: block;
+}
+
+.grid-container {
+	display: grid;
+	grid-template-areas: 0.25fr 1fr 1fr;
+	grid-template-rows: 0.5fr 0.5fr 0.5fr 0.5fr 0.25fr 0.5fr;
+	grid-template-areas: 
+						 "controlsChart visualization visualization"
+						 "controlsTeams visualization visualization"
+						 "controlsPlayer visualization visualization"
+						 " . controlsShots controlsDistance"
+}
+.introTextBox {
+	grid-area: introTextBox;
+	justify-self: center;
+	display: block;
+	margin: 5em auto;
+	width: 50%;
+	height: 150px;
+	border: 3px solid #000000;
+	background-color: #DCDCDC;
+	border-radius: 20px;
+}
+.controlsChart {
+	grid-area: controlsChart;
+	justify-self: center;
+}
+.controlsTeams {
+	grid-area: controlsTeams;
+	justify-self: center;
+}
+.controlsPlayer {
+	grid-area: controlsPlayer;
+	justify-self: center;
+}
+.controlsDistance {
+	grid-area: controlsDistance;
+	justify-self: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.controlsShots {
+	grid-area: controlsShots;
+	justify-self: center;
+	width: 100%; 
+	justify-content: center;
+	align-items: center;
+}
+.visualization {
+	grid-area: visualization;
+	justify-self: center;
+}
+#distanceSlider {
+	display: none;
+}
+#percentageSlider {
+	display: none;
+}
+#shots {
+	display: none;
+}
+
+.plotArea {
+	height: 600px;
+	width: 100%;
+	display: block;
+	margin: auto;
+	background-color: #000000;
+}
+
+.introductionTextBox {
+	display: block;
+	margin: auto;
+	width: 50%;
+	height: 200px;
+	border: 3px solid #000000;
+	background-color: #DCDCDC;
+	border-radius: 20px;
+}
+
+.chartType {
+	display: flex;
+	width: 100%;
+	height: 10em;
+	align-items: center;
+	justify-content: center;
+}
+
+.slider {
+	-webkit-appearance: none;
+	width: 100%;
+	height: 0.5em;
+	background: #800080;
+	outline: none;
+	color: #800080;
+	outline: none;
+	opacity: 0.6;
+	-webkit-transition: 0.5s;
+	transition: opacity 0.5s;
+}
+
+.slider:hover {
+	opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0.5em;
+  height: 2em;
+  background-color: #800080;
+  cursor: pointer;
+}
+
+.shots {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
 .dropdown {
 	display:inline-block;
 }
 
-.shots button {
-	background-color: #D2691E;
-	color: #FFFFFF;
-	padding: 16px;
-	font-size: 16px;
-	border: none;
-	cursor: pointer;
-}
 
-.shots button:hover {
-	background-color: #FFFFFF;
-	color: #D2691E;
-}
-
-.chartType button {
-	background-color: #FA8072;
-	color: #FFFFFF;
-	padding: 16px;
-	font-size: 16px;
-	border: none;
-	cursor: pointer;
-}
-
-.chartType button:hover {
-	background-color: #FFFFFF;
-	color: #FA8072;
-}
 
 .plot-background {
 	background-color: #000000;
 
 }
 
-.dropbtn {
-	background-color: #87CEFA;
-	color: #FFFFFF;
-	padding: 16px;
-	font-size: 16px;
-	border: none;
-	cursor: pointer;
-}
-
-.dropbtn:hover, .dropbtn:focus {
-	background-color: #FFFFFF;
-	color: #87CEFA;
-}
-
 .dropdown-content {
 	display: none;
 	position: absolute;
-	background-color: #FFFFFF;
-	min-width: 160px;
-	box-shadow: 0 8 16 0 rgba(0,0,0,0.2);
-	z-index: 1;
+	background-color: #000000;
+	width: auto;
 }
 
 .dropdown-content a {
-	color: black;
-	padding: 12px 16px;
+	color: #800080;
 	text-decoration: none;
 	display: block;
+	font-family: Arial;
+
 }
 
 .dropdown-content a:hover {
-	background-color: #87CEFA;
+	background-color: #800080;
+	color: #000000;
 }
 
 .show {
@@ -83,13 +208,30 @@ body {
 }
 
 .highlighted {
-	transition-duration: 1s;
-	stroke-width: 1;
+	opacity: 0.2;
+}
+.highlightedPlayer {
 	opacity: 0.5;
 }
-
 .unhighlighted {
-	transition-duration: 1s;
-	stroke-width: 0.1;
-	opacity: 0.1;
+	opacity: 0;
 }
+
+.colHighlighted {
+	transition-duration: 1s;
+	opacity: 1;
+}
+
+.colUnhighlighted {
+	transition-duration: 1s;
+	opacity: 0;
+}
+
+.d3-tip {
+      line-height: 1.5;
+      padding: 6px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+    }

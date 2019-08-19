@@ -1,26 +1,17 @@
-// Variables
+		// Variables
 		var body = d3.select('body')
 		var h = 600
 		var w = 800
-		var colRx = 3;
-		var colRy = 1.5;
+		var colRx = 3.5;
+		var colRy = 2.5;
 		var cellSize = 10;
 		var plotData = []
 		var plotFunction;
 		var leagueShotGrid;
 		var sliceIndex = 0;
 		var line = d3.line().curve(d3.curveBundle.beta(0.8))
-
-		var courtData = [{"x" : 50, "y" : -250},
-						 {"x" : -0, "y" : -250},
-						 {"x" :  0, "y" :  250},
-						 {"x" : 50, "y" :  250}]
-						 
-		var arcData = [{"x":  50, "y" : 250},
-					   {"x": 300, "y" : 250},
-					   {"x": 300, "y" :   0},
-					   {"x": 300, "y" :-250},
-					   {"x":  50, "y" :-250}]
+		var myColor = d3.scaleSequential().domain([-20,20])
+					.interpolator(d3.interpolateViridis);
 					   
 		var	teams = [{'id': 1610612737,
 			  'full_name': 'Atlanta Hawks'},
@@ -82,15 +73,16 @@
 			  'full_name': 'Detroit Pistons'},
 			 {'id': 1610612766,
 			  'full_name': 'Charlotte Hornets'}]
+		
 		// SVG
-		var svgContainer = body.append('svg')
+		var svgContainer = d3.select(".visualization").append('svg')
 			.attr('height', h)
 			.attr('width', w)
 			.attr("class", "plot-background")
 	
 			g = svgContainer.append("g")
-							
-		d3.csv("/data/leagueAverages.csv").then(function(data) {
+		// Load league averages dataset and save it in a variable	
+		d3.csv("data/leagueAverages.csv").then(function(data) {
 			data.forEach(function(d) {
 				d['xMin'] = +d['xMin'],
 				d['xMax'] = +d['xMax'],
@@ -101,43 +93,44 @@
 			leagueShotGrid = data;
 		});
 		
-		d3.csv("/data/shots2.csv").then(function(data) {
+		// MAIN FUNCTION - load the shots dataset and add functions for plotting
+		d3.csv("data/shots2.csv").then(function(data) {
 			data.forEach(function(d) { d['NEW_Y'] = +d['NEW_Y'],
 						  			   d['LOC_X'] = +d['LOC_X']; 
 									});
+			console.log(data)
+									
+			// Data point scaling functions
 			var xScale = d3.scaleLinear()
-				.domain([d3.min(data, function (d) {return d.NEW_Y;}),400])
+				.domain([d3.min(data, function (d) {return d.NEW_Y;}), 325])
 				.range([0, w]);
 
 			var yScale = d3.scaleLinear()
 				.domain([d3.min(data, function (d) {return d.LOC_X - 50;}),
 						 d3.max(data, function (d) {return d.LOC_X + 200;})])
 				.range([h, 0]);
-				
-			/* var line2 = d3.line()
-				.x(function(d) { return xScale(d.x); })
-				.y(function(d) { return yScale(d.y); })
 			
-			var arc = d3.line()
-				.x(function(d) { return xScale(d.x); })
-				.y(function(d) { return yScale(d.y); })
-				.curve(d3.curveBundle.beta(0.9))
+			// Add and skew court outline image
+			var backgroundImage = svgContainer.append("svg:image")
+				.attr("xlink:href", "court5.svg")
+				.attr("transform", "skewX(-33)")
+				.attr("x", 390)
+				.attr("y", 180)
+				.attr("preserveAspectRatio", "none")
+				.attr("height", 355)
+				.attr("width", 500)
+				.attr("opacity", 0.4)
 			
-			svgContainer.append("path")
-				.attr("d", line2(courtData))
-				.attr("stroke", "gold")
-				.attr("stroke-width", 2)
-			
-			svgContainer.append("path")
-				.attr("d", arc(arcData))
-				.attr("stroke", "gold")
-				.attr("stroke-width", 2) */
-				
+			// Team button functionality
 			d3.selectAll(".teamButton").on("click", function() {
+				document.getElementById("teamsButton").innerHTML = this.id;
+				
+				// Remove previous plots
 				removeCurves();
 				removeCols();
+				
+				// Create team data variable and populate players drop down
 				var teamData = getTeamData(this.id);
-				var teamDataSliced = sliceData(teamData, 50)
 				var players = new Set(teamData.map(function(d) {
 					return d.PLAYER_NAME;
 				}));
@@ -145,6 +138,7 @@
 				while (select.firstChild) {
 					select.removeChild(select.firstChild);
 				}
+				// Players drop down
 				players.forEach(function(player) {
 					var player = player
 					var element = document.createElement("a")
@@ -152,46 +146,56 @@
 					element.textContent = player
 					element.className = "playerButton"
 					element.href = "#"
-					element.onclick = function() {						
+					element.onclick = function() {
+						document.getElementById("playersButton").innerHTML = this.id;
 						highlightPlayer(player)
 					}
 					select.appendChild(element)
 				 })
 				
-				if (plotFunction == plot2) {
+				// Plotting blocks - according to the chart type button clicked
+				if (plotFunction == plotCurves) {
+					var teamDataSliced = sliceData(teamData, 50)
 					var iterator = setInterval(function() {
 						if (sliceIndex >= teamDataSliced.length) {
 							clearInterval(iterator);
 							sliceIndex = 0;
 						}	
-						plot2(teamDataSliced[sliceIndex])
-						sliceIndex += 1;}, 50);
+						plotCurves(teamDataSliced[sliceIndex])
+						sliceIndex += 1;}, 25);
+						
 				} else if (plotFunction == plotCols) {
 					var toPlot = createShotGrid(cellSize, teamData)
 					var colRow = toPlot.length - 1;
 					var iteratorCol = setInterval(function() {
-					if (colRow <= 0) {
-						clearInterval(iteratorCol);
-						colRow = toPlot.length - 1;
-					}	
-					plotCols(toPlot[colRow])
-					colRow -= 1;}, 50);
+						if (colRow <= 0) {
+							clearInterval(iteratorCol);
+							colRow = toPlot.length - 1;
+						}	
+						plotCols(toPlot[colRow])
+						colRow -= 1;}, 50);
+					drawColLegend();
 				}
 			});	
-
-			d3.select(".madeShotsButton").on("click", function() {
+			
+			// Filtering button and slider functionality
+			d3.select("#madeShotsButton").on("click", function() {
 				showMadeShots()
 			});
 			
-			d3.select(".allShotsButton").on("click", function() {
+			d3.select("#allShotsButton").on("click", function() {
 				showAllShots()
 			});
 			
 			d3.select(".curvesButton").on("click", function() {
-				plotFunction = plot2;
+				plotFunction = plotCurves;
+				hidePercentageSliders();
+				showShotButtons();
 			});
 			
 			d3.select(".colsButton").on("click", function() {
+				hideShotButtons();
+				showPercentageSliders();
 				plotFunction = plotCols;
 			});
 			
@@ -199,15 +203,41 @@
 				selectedValue = this.value
 				updateDistance(selectedValue)
 			  })
-							
+			  
+			d3.select("#colSliderMin").on("change", function(d){
+				selectedValue = this.value
+				updateColumnsMin(selectedValue)
+			  })
+			  
+			d3.select("#colSliderMax").on("change", function(d){
+				selectedValue = this.value
+				updateColumnsMax(selectedValue)
+			  })
+			
+			// Tool tip for column chart
+			var tool_tip = d3.tip()
+				  .attr("class", "d3-tip")
+				  .offset([-8, 0])
+				  .html(function(d) {
+						var xLoc = d.xMin;
+						var yLoc = d.yMin;
+					    return "Shots: " + d.totalShots + "<br/>" + 
+							   "% Made: " + d.shotPercentage.toPrecision(3) + "<br/>" +
+							   "League Average % Made: " + leagueShotGrid.filter(function(d) {
+									return d.xMin == xLoc & d.yMin == yLoc;
+									})[0].shotPercentage.toPrecision(3);
+						});
+				svgContainer.call(tool_tip);
+			
+			// Helper functions to get data of player/team
 			function getTeamData(teamName) {
 				return data.filter(function(d) { return d.TEAM_NAME == teamName; });
-			}
-			
+			}			
 			function getPlayerData(playerName) {
 				return data.filter(function(d) { return d.PLAYER_NAME == playerName; });
 			}
-
+			
+			// Dataset slicer for curve plot
 			function sliceData(data, sliceSize) {
 				var dataSliced = [];
 				if (sliceSize <= 0) {
@@ -219,10 +249,51 @@
 				return dataSliced;
 			}
 			
-			function plotCols(data) {
-				var myColor = d3.scaleSequential().domain([-20,20])
-					.interpolator(d3.interpolateViridis);
+			// Draw legend for column chart
+			function drawColLegend() {
 					
+				var legendData = [-20, -15, -10, -5, 0, 5, 10, 15, 20];	
+				legend = svgContainer.selectAll(".legend")
+					.data(legendData)
+					.enter()
+					
+					legend
+					.append("rect")
+					.attr("x", function(d){
+						return 657.5 + d * 4;
+					})
+					.attr("y", 40)
+					.attr("width", 20)
+					.attr("height", 15)
+					.attr("fill", function(d) {
+						return myColor(d);
+					})
+					
+					legend
+					.append("text")
+					.text(function(d) {
+						return " " + d;
+					})
+					.attr("x", function(d) {
+						return 660 + d*4;
+					})
+					.attr("y", 68)
+					.attr("font-family", "Arial")
+					.attr("font-size", 10)
+					.attr("fill", "white");
+					
+				svgContainer.append("text")
+					.text("Shooting % vs. League avg.")
+					.attr("y", 35)
+					.attr("x", 578)
+					.attr("font-size", 12)
+					.attr("font-family", "Arial")
+					.attr("fill", "white")
+			}
+			
+			// Column chart plotting function
+			function plotCols(data) {
+			
 				var col = svgContainer.append("g");
 				
 				col
@@ -247,17 +318,7 @@
 						var dif = d.shotPercentage - league;
 						return myColor(dif);
 					})
-					/* .attr("stroke", function(d) {
-						if (d.totalShots != 0) {
-							return "black";
-						} else {
-							return "white";
-						}
-					})
-					.attr("stroke-width", 0.1) */
-					//.attr("opacity", 0.5)
-					
-				
+									
 				col.selectAll("rect")
 				.data(data.filter(function(d) { return d.totalShots != 0 }))
 				.enter()
@@ -282,6 +343,8 @@
 						return myColor(dif);
 					})
 					.attr("opacity", 0.5)
+					.on('mouseover', tool_tip.show)
+					.on('mouseout', tool_tip.hide)
 										
 				col.selectAll("path")
 				.data(data.filter(function(d) { return d.totalShots != 0 }))
@@ -304,25 +367,14 @@
 						var dif = d.shotPercentage - league;
 						return myColor(dif);
 					})
-					/* .attr("stroke", function(d) {
-						if (d.totalShots != 0) {
-							return "black";
-						} else {
-							return "white";
-						}
-					})
-					.attr("stroke-width", 0.1) */
-					//.attr("opacity", 0.5)
+					
 			}
-									
-			function plot2(data) {
+			
+			// Curve chart plotting function
+			function plotCurves(data) {
 				
 				var curve = g.selectAll('path')
 				.data(data, function(d) {return d;});
-				
-				/* curve
-				.exit()
-				.remove();  */
 				
 				curve
 				.enter()
@@ -333,10 +385,10 @@
 									  [xScale(0), yScale(300)],
 									  [xScale(0), yScale(200)]])
 									  })
-						.attr("stroke", "gold")
+						.attr("stroke", "#00FFFF")
 						.attr("stroke-width", 0.25)
 						.attr("fill", "none")
-						.attr("opacity", 0.1)
+						.attr("class", "highlighted")
 						.attr("stroke-dasharray", function(){
 							var length = this.getTotalLength();
 							return length + " " + length;
@@ -350,30 +402,19 @@
 							.duration(1000)
 							.ease(d3.easeLinear)
 							.attr("stroke-dashoffset", 0)
-								
-				// Add points at the botton of curves:			
-				/* var point = g.selectAll('circle')
-					.data(data, function(d) { return d;});
-					
-				point.exit().remove();
-				
-				point.enter()
-				.append('circle')
-				.attr("r", 10)
-				.attr("cx", function(d) { return xScale(d.NEW_Y); })
-				.attr("cy", function(d) { return yScale(d.LOC_X); })
-				.attr("opacity", 0.05) */
 			
 			}			
-		
+			
+			// Show player plots, based on chart type chosen
 			function highlightPlayer(playerName) {
 				
-				if (plotFunction == plot2) {
+				if (plotFunction == plotCurves) {
 					g.selectAll("path")
-						.classed("unhighlighted", true)
-						.filter(function(d) {return d.PLAYER_NAME == playerName; })
 						.classed("unhighlighted", false)
-						.classed("highlighted", true)
+						.classed("highlightedPlayer", true)
+						.filter(function(d) {return d.PLAYER_NAME != playerName; })
+						.classed("unhighlighted", true)
+						
 				} else if (plotFunction == plotCols) {
 					removeCols();
 					var playerData = getPlayerData(playerName)
@@ -386,9 +427,11 @@
 					}	
 					plotCols(toPlot[colRow])
 					colRow -= 1;}, 50);
+					drawColLegend();
 				}
 			};
 			
+			// Self explanatory helper functions
 			function showMadeShots() {
 			g.selectAll("path")
 				.filter(function(d) {
@@ -400,7 +443,7 @@
 						})
 						.attr("stroke-dashoffset", 0)
 						.transition()
-							.duration(2000)
+							.duration(1000)
 							.ease(d3.easeLinear)
 							.attr("stroke-dashoffset", function() {
 								return this.getTotalLength();
@@ -421,21 +464,59 @@
 							return length;
 						})
 						.transition()
-							.duration(2000)
+							.duration(1000)
 							.ease(d3.easeLinear)
 							.attr("stroke-dashoffset", 0)
 			}
 		
 			function updateDistance(distance) {
 				g.selectAll("path")
-					.classed("unhighlighted", true)
-					.filter(function(d) {
-						return d.SHOT_DISTANCE == distance
-					})
 					.classed("unhighlighted", false)
 					.classed("highlighted", true)
+					.filter(function(d) {
+						return d.SHOT_DISTANCE != distance;
+					})
+					.classed("unhighlighted", true)
+					
 			}
-		
+			
+			function updateColumnsMin(percentage) {
+				svgContainer.selectAll("g")
+					.selectAll("rect")
+					.classed("colUnhighlighted", true)
+					.filter(function(d) {
+						return d.shotPercentage > percentage;
+					})
+					.classed("colUnhighlighted", false)
+					
+				svgContainer.selectAll("g")
+					.selectAll("ellipse")
+					.classed("colUnhighlighted", true)
+					.filter(function(d) {
+						return d.shotPercentage > percentage;
+					})
+					.classed("colUnhighlighted", false)
+			}
+			
+			function updateColumnsMax(percentage) {
+				svgContainer.selectAll("g")
+					.selectAll("rect")
+					.classed("colUnhighlighted", true)
+					.filter(function(d) {
+						return d.shotPercentage < percentage;
+					})
+					.classed("colUnhighlighted", false)
+					
+				svgContainer.selectAll("g")
+					.selectAll("ellipse")
+					.classed("colUnhighlighted", true)
+					.filter(function(d) {
+						return d.shotPercentage < percentage;
+					})
+					.classed("colUnhighlighted", false)
+			}
+			
+			// Binning of dataset into grid of cells of chosen size
 			function createShotGrid(cellSize, data) {
 				var grid = [];
 				var gridRow = 0;
@@ -465,7 +546,9 @@
 					}		
 				return grid;
 			}
-		
+			
+			
+			// Removing plots
 			function removeCurves() {
 				d3.selectAll("path").transition().duration(1000).attr("opacity", 0).remove();
 			}
@@ -474,8 +557,12 @@
 				d3.selectAll("rect").transition().duration(1000).attr("opacity", 0).remove();
 				d3.selectAll("ellipse").transition().duration(1000).attr("opacity", 0).remove();
 				d3.selectAll("line").transition().duration(1000).attr("opacity", 0).remove();
+				d3.selectAll("text").remove();
 			}
+			
 		});
+			
+			// Populate team drop down
 			var select = document.getElementById("teamsDropdown");			
 			for(var i = 0; i < teams.length; i++) {
 				var team = teams[i].full_name
@@ -486,8 +573,15 @@
 				element.href = "#"
 				select.appendChild(element)
 			}
-
-
+		
+		// Reset curve plot after filtering by distance
+		function resetDistance() {
+				g.selectAll("path")
+					.classed("unhighlighted", false)
+					.classed("highlighted", true)
+			}
+		
+		// Reveal team/player dropdowns
 		function showTeams() {
 			document.getElementById("teamsDropdown").classList.toggle("show");
 		}
@@ -495,7 +589,27 @@
 		function showPlayers() {
 			document.getElementById("playersDropdown").classList.toggle("show");
 		}
-
+		
+		// Reveal and hide filtering options
+		function showShotButtons() {
+			document.getElementById("shots").style.display = 'block';
+			document.getElementById("distanceSlider").style.display = "block";
+		}
+		
+		function hideShotButtons() {
+			document.getElementById("shots").style.display = 'none';
+			document.getElementById("distanceSlider").style.display = 'none';
+		}
+		
+		function showPercentageSliders() {
+			document.getElementById("percentageSlider").style.display = "block";
+		}
+		
+		function hidePercentageSliders() {
+			document.getElementById("percentageSlider").style.display = "none";
+		}
+		
+		// Hide drop down when mouse is clicked elsewhere on the screen
 		window.onclick = function(event) {
 			if (!event.target.matches('.dropbtn')) {
 				var dropdowns = document.getElementsByClassName("dropdown-content");
@@ -507,3 +621,5 @@
 				}
 			}
 		}
+		
+		
