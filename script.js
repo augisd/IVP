@@ -82,7 +82,7 @@
 	
 			g = svgContainer.append("g")
 		// Load league averages dataset and save it in a variable	
-		d3.csv("IVP/data/leagueAverages.csv").then(function(data) {
+		d3.csv("data/leagueAverages.csv").then(function(data) {
 			data.forEach(function(d) {
 				d['xMin'] = +d['xMin'],
 				d['xMax'] = +d['xMax'],
@@ -94,7 +94,7 @@
 		});
 		
 		// MAIN FUNCTION - load the shots dataset and add functions for plotting
-		d3.csv("IVP/data/shots2.csv").then(function(data) {
+		d3.csv("data/shots2.csv").then(function(data) {
 			data.forEach(function(d) { d['NEW_Y'] = +d['NEW_Y'],
 						  			   d['LOC_X'] = +d['LOC_X']; 
 									});
