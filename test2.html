@@ -41,7 +41,7 @@
 				.attr('width', w)
 
 			// Load the data
-			d3.csv("/data/shots.csv").then(function(data) {
+			d3.csv("/data/warriors.csv").then(function(data) {
 			data.forEach(function(d) { d['LOC_Y'] = +d['LOC_Y'],
 						  			   d['LOC_X'] = +d['LOC_X']; });
 
@@ -69,7 +69,18 @@
 					.attr("stroke", "black")
                     .attr("stroke-width", 0.75)
                     .attr("fill", "none")
-                    .attr("opacity", 0.1)
+                    .attr("opacity", 0.2)
+                    .attr("stroke-dasharray", function(){
+						var length = this.getTotalLength();
+						return length + " " + length;
+					})
+					.attr("stroke-dashoffset", function(){
+						var length = this.getTotalLength();
+						return length;
+					})
+					.transition()
+						.duration(5000)
+						.attr("stroke-dashoffset", 0)
 
             function update(id) {
             	svgContainer.selectAll('path')
