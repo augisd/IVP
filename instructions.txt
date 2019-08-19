@@ -1,0 +1,3 @@
+access: http://mersey.cs.nott.ac.uk/~psxad4/ (from university network only)
+tested on Google Chrome only
+for dataprocessing.ipynb file, need jupyter notebook pandas and nba_api python libraries installed.
